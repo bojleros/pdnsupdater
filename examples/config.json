@@ -1,0 +1,25 @@
+{
+	"creds": {
+		"bartek": {
+			"pass": "2cf7bab4e8a1c85a4135106f70b308e7160d9bb535b8011c73453e3f8ee936175557d41c22492c0782032b559becf5266ecdefa5bde2c7951a9a9907070e47a9",
+			"records": ["freddy.gazownia.pl"]
+		},
+		"radzio": {
+			"pass": "hashlib.sha512('yourpass').hexdigest() here",
+			"records": ["tadzik.onet.pl"]
+	
+		}
+	},
+	"mariadb": {
+		"host": "localhost",
+		"port":	"3306",
+		"database": "pdns",
+		"user": "pdns",
+		"password": "pdnspass",
+		"connection_timeout": "5"
+	},
+	"listen": {
+		"host": "127.0.0.1",
+		"port": "8888"
+	}
+}
