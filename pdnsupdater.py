@@ -46,7 +46,7 @@ class Db:
     dbconf = cfg.get('mariadb',None)
     if dbconf != None:
       try:
-        dbconf['connection_timeout'] = float(dbconf['connection_timeout'])
+        dbconf['connection_timeout'] = int(dbconf['connection_timeout'])
         self.conn = mariadb.connect(**dbconf)
         self.cur = self.conn.cursor()
       except Exception as e:
@@ -165,7 +165,7 @@ def update():
     return "Invalid creds", 403
 
   userdef = cfg['creds'].get(user, None)
-  pswd = hashlib.sha512(pswd).hexdigest()
+  pswd = hashlib.sha512(pswd.encode('utf-8')).hexdigest()
   if userdef == None:
     #nonexistient user
     return "Invalid creds", 403
