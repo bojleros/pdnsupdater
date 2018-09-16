@@ -36,11 +36,20 @@ python pdnsupdater
 
 ### More reasonable way of starting
 
-#### Use gunicorn with built-in ssl
+#### Use container (with ssl)
 
+```
+# ls /pdnsu/
+config.json  server.crt  server.key
+# docker run --rm --name pdnsu -v /pdnsu:/etc/pdnsupdater -p 8888:8888 bojleros/pdnsupdater
+```
+
+#### Use standalone gunicorn with built-in ssl
+
+```
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout $(hostname -s).key -out $(hostname -s).crt
 gunicorn -b 0.0.0.0:8443 -w 2 --keyfile $(hostname -s).key --certfile $(hostname -s).crt pdnsupdater:app
-
+```
 
 #### Use nginx+gunicorn
 
