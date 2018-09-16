@@ -216,16 +216,11 @@ def init():
 
   if cfg == None:
     try:
-      f=open("config.json")
+      f=open("/etc/pdnsupdater/config.json")
       cfg=json.load(f)
     except Exception as e:
       print("Unable to load configuration file ... %s" % (str(e)))
-      try:
-        f=open("/etc/pdnsupdater/config.json")
-        cfg=json.load(f)
-      except Exception as e:
-        print("Unable to load configuration file ... %s" % (str(e)))
-        sys.exit(-1)
+      sys.exit(-1)
 
     f.close()
 
