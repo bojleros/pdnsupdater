@@ -147,7 +147,39 @@ class Db:
     else:
       raise UpdateNotNeeded("No update needed")
 
+  def get_user(self,user):
+    '''
+    This one queries userpass table and returns password hash together with list of entitled domains
+    '''
 
+    try:
+      self.cur.execute("SELECT uid,user,pass FROM pdnsu_users where user='%s'" % (str(user)),)
+    except Exception as e:
+      self.__del__()
+      raise e
+
+    out = self.cur.fetchall()
+    if len(out) > 1:
+      self.__del__()
+      raise ValueError("More than one user matched !")
+
+    if len(out) == 0:
+      return None
+
+    uid = out[0][0]
+    hash = out[0][2]
+
+    try:
+      self.cur.execute("SELECT domain FROM pdnsu_domains where uid=%s order by did asc" % (str(uid)),)
+    except Exception as e:
+      self.__del__()
+      raise e
+
+    out = self.cur.fetchall()
+
+    domains = [ x[0] for x in out ]
+
+    return { 'pass' : hash , 'records' : domains }
 
 
 @app.route('/update', methods=['POST'])
@@ -164,14 +196,15 @@ def update():
     #please provide this two variables via post
     return "Invalid creds", 403
 
-  userdef = cfg['creds'].get(user, None)
-  pswd = hashlib.sha512(pswd.encode('utf-8')).hexdigest()
-  if userdef == None:
-    #nonexistient user
-    return "Invalid creds", 403
+  if cfg.get('creds_from','file') == "db":
+    d=Db(cfg)
+    userdef = d.get_user(user)
+  else:
+    userdef = cfg['creds'].get(user, None)
 
-  if userdef['pass'] != pswd:
-    #incorrect password
+  pswd = hashlib.sha512(pswd.encode('utf-8')).hexdigest()
+  if userdef == None or userdef['pass'] != pswd:
+    #nonexistient user or incorrect pass
     return "Invalid creds", 403
 
   #request lacking a parameter fqdn will alter first record on a list
@@ -179,7 +212,11 @@ def update():
     if fqdn not in userdef['records']:
   	   return "You are not allowed to tackle with this record", 400
   else:
-    fqdn = cfg['creds'][user]['records'][0]
+    if len(userdef['records']) > 0 :
+      fqdn = userdef['records'][0]
+    else:
+      #user is valid but has no entitlement
+      return "You are not allowed to tackle with this record", 400
 
   domain = '.'.join(fqdn.split('.')[1:])
   hostn = fqdn[0]
@@ -195,7 +232,9 @@ def update():
 
   value=str(value)
 
-  d=Db(cfg)
+  if cfg.get('creds_from','file') != "db":
+    d=Db(cfg)
+
   try:
     d.update_A(fqdn,value)
   except RecordUpdated as e:

@@ -7,9 +7,9 @@
 		"radzio": {
 			"pass": "hashlib.sha512('yourpass').hexdigest() here",
 			"records": ["tadzik.onet.pl"]
-	
 		}
 	},
+  "creds_from": "db",
 	"mariadb": {
 		"host": "localhost",
 		"port":	"3306",
